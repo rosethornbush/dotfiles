@@ -21,13 +21,8 @@ zinit light-mode for \
     zdharma-continuum/zinit-annex-patch-dl \
     zdharma-continuum/zinit-annex-rust
 
-# ZSH Plugins
-zinit light zsh-users/zsh-syntax-highlighting
+# ZSH Plugins - completions first
 zinit light zsh-users/zsh-completions
-zinit light zsh-users/zsh-autosuggestions
-zinit light Aloxaf/fzf-tab
-zi ice has'zoxide'
-zi light z-shell/zsh-zoxide
 
 # ZSH OMZ Snippets
 zinit snippet OMZL::git.zsh
@@ -38,6 +33,15 @@ zinit snippet OMZP::command-not-found
 # Load completions
 autoload -Uz compinit && compinit
 zinit cdreplay -q
+
+# fzf-tab must load after compinit, before autosuggestions/syntax-highlighting
+zinit light Aloxaf/fzf-tab
+
+# These must load after fzf-tab
+zinit light zsh-users/zsh-autosuggestions
+zinit light zsh-users/zsh-syntax-highlighting
+zi ice has'zoxide'
+zi light z-shell/zsh-zoxide
 
 # Keybindings
 bindkey -e
