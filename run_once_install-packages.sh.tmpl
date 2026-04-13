@@ -1,0 +1,69 @@
+#!/bin/bash
+set -e
+
+echo "Installing CLI tools..."
+
+{{- if eq .chezmoi.os "darwin" }}
+
+brew install bat eza fzf zoxide oh-my-posh zsh
+
+{{- else if eq .chezmoi.os "linux" }}
+
+if command -v apt &> /dev/null; then
+    sudo apt update
+    sudo apt install -y bat fzf zsh git curl
+
+    # bat is installed as batcat on Debian/Ubuntu
+    if [ ! -f /usr/bin/bat ] && [ -f /usr/bin/batcat ]; then
+        sudo ln -sf /usr/bin/batcat /usr/local/bin/bat
+    fi
+
+    # eza (not in default repos)
+    if ! command -v eza &> /dev/null; then
+        if command -v cargo &> /dev/null; then
+            cargo install eza
+        else
+            EZA_VERSION=$(curl -s https://api.github.com/repos/eza-community/eza/releases/latest | grep tag_name | cut -d '"' -f 4)
+            curl -Lo /tmp/eza.tar.gz "https://github.com/eza-community/eza/releases/download/${EZA_VERSION}/eza_x86_64-unknown-linux-gnu.tar.gz"
+            tar -xzf /tmp/eza.tar.gz -C /tmp
+            sudo mv /tmp/eza /usr/local/bin/
+            rm /tmp/eza.tar.gz
+        fi
+    fi
+
+    # zoxide
+    if ! command -v zoxide &> /dev/null; then
+        curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
+    fi
+
+    # oh-my-posh
+    if ! command -v oh-my-posh &> /dev/null; then
+        curl -s https://ohmyposh.dev/install.sh | bash -s
+    fi
+
+elif command -v dnf &> /dev/null; then
+    sudo dnf install -y bat eza fzf zsh git curl
+
+    if ! command -v zoxide &> /dev/null; then
+        curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
+    fi
+
+    if ! command -v oh-my-posh &> /dev/null; then
+        curl -s https://ohmyposh.dev/install.sh | bash -s
+    fi
+
+elif command -v pacman &> /dev/null; then
+    sudo pacman -S --noconfirm bat eza fzf zoxide zsh git curl
+
+    if ! command -v oh-my-posh &> /dev/null; then
+        curl -s https://ohmyposh.dev/install.sh | bash -s
+    fi
+
+else
+    echo "Unknown package manager. Install manually: bat, eza, fzf, zoxide, oh-my-posh"
+    exit 1
+fi
+
+{{- end }}
+
+echo "Done installing CLI tools"
